@@ -1,6 +1,7 @@
 package com.kash.blog.controller;
 
 import com.kash.blog.payload.PostDto;
+import com.kash.blog.payload.PostResponse;
 import com.kash.blog.service.PostService;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
@@ -25,7 +26,7 @@ public class PostController {
     }
 
     @GetMapping
-    public List<PostDto> getAllPosts(
+    public PostResponse getAllPosts(
             @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
             @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize
     ){
