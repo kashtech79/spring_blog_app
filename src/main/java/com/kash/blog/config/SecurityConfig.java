@@ -11,11 +11,8 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
 @Configuration
 @EnableWebSecurity
@@ -23,46 +20,29 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
-    private CustomUserDetailsService customUserDetailsService;
+    private CustomUserDetailsService userDetailsService;
 
     @Bean
     PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
     }
 
-
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
-            .csrf().disable()
-            .authorizeRequests()
-            .antMatchers(HttpMethod.GET, "/api/**").permitAll()
-            .antMatchers("/api/auth/**").permitAll()
-            .anyRequest()
-            .authenticated()
-            .and()
-            .httpBasic();
+                .csrf().disable()
+                .authorizeRequests()
+                .antMatchers(HttpMethod.GET, "/api/**").permitAll()
+                .antMatchers("/api/auth/**").permitAll()
+                .anyRequest()
+                .authenticated()
+                .and()
+                .httpBasic();
     }
 
     @Override
-    @Bean
-    protected UserDetailsService userDetailsService() {
-        var user = User.builder()
-                .username("kash")
-                .password(passwordEncoder()
-                        .encode("kash1979"))
-                .roles("USER")
-                .build();
-        var admin = User.builder()
-                .username("admin")
-                .password(passwordEncoder().encode("kash1979"))
-                .roles("ADMIN")
-                .build();
-        return new InMemoryUserDetailsManager(user, admin);
-    }
-
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(customUserDetailsService)
+        auth.userDetailsService(userDetailsService)
                 .passwordEncoder(passwordEncoder());
     }
 
