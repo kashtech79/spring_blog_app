@@ -3,10 +3,12 @@ package com.kash.blog.controller;
 
 import com.kash.blog.entity.Role;
 import com.kash.blog.entity.User;
+import com.kash.blog.payload.JWTAuthResponse;
 import com.kash.blog.payload.LoginDto;
 import com.kash.blog.payload.SignupDto;
 import com.kash.blog.repository.RoleRepository;
 import com.kash.blog.repository.UserRepository;
+import com.kash.blog.security.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,14 +40,20 @@ public class AuthController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private JwtTokenProvider tokenProvider;
+
 
     @PostMapping("/signin")
-    public ResponseEntity<String> authenticateUser(@RequestBody LoginDto loginDto) {
+    public ResponseEntity<JWTAuthResponse> authenticateUser(@RequestBody LoginDto loginDto) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 loginDto.getUsernameOrEmail(), loginDto.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        return new ResponseEntity<>("User signed -in succesfully", HttpStatus.OK);
+
+        // get token from token provider
+        String token = tokenProvider.generateToken(authentication);
+        return ResponseEntity.ok(new JWTAuthResponse(token));
     }
 
     @PostMapping("/signup")
